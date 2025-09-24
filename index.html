@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>汉字转拼音工具</title>
+    <script src="https://cdn.jsdelivr.net/npm/pinyin-pro@3.27.0/dist/index.js"></script>
+    <style>
+        body {
+            font-family: 'Microsoft YaHei', sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+        }
+
+        .controls {
+            margin-bottom: 30px;
+        }
+
+        .control-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #555;
+        }
+
+        #chineseText {
+            width: 100%;
+            min-height: 150px;
+            padding: 15px;
+            font-size: 16px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            resize: vertical;
+            box-sizing: border-box;
+        }
+
+        #chineseText:focus {
+            outline: none;
+            border-color: #4CAF50;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        button {
+            padding: 12px 25px;
+            font-size: 16px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        #printBtn {
+            background-color: #2196F3;
+        }
+
+        #printBtn:hover {
+            background-color: #1976D2;
+        }
+
+        .slider-controls {
+            display: flex;
+            gap: 30px;
+            flex-wrap: wrap;
+        }
+
+        .font-size-control, .spacing-control {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        input[type="range"] {
+            width: 100%;
+            margin: 10px 0;
+        }
+
+        .font-size-display, .spacing-display {
+            display: inline-block;
+            width: 40px;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .preview-section h2 {
+            color: #333;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 10px;
+        }
+
+        .a4-container {
+            border: 1px solid #ddd;
+            padding: 20px;
+            min-height: 300px;
+            background-color: white;
+        }
+
+        .result-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .result-table td {
+            text-align: center;
+            padding: 5px;
+            border: 1px solid #eee;
+        }
+
+        .pinyin-cell {
+            font-size: 0.9em;
+            color: #333;
+            height: 1.8em;
+            line-height: 1.2em;
+            vertical-align: bottom;
+            padding: 0;
+            margin: 0;
+        }
+
+        .chinese-cell {
+            font-size: 1.2em;
+        }
+
+        /* 打印专用样式：独立定义，避免影响主样式 */
+        @media print {
+            body, .chinese-cell, .pinyin-cell {
+                background-color: white !important;
+                padding: 0 !important;
+                font-family: 'SimSun', 'Microsoft YaHei', sans-serif !important;
+                color: #000 !important;
+            }
+
+            .controls, .preview-controls {
+                display: none !important;
+            }
+
+            .a4-container {
+                box-shadow: none !important;
+                margin: 0 !important;
+                padding: 0 !important;
+                width: 100% !important;
+                min-height: auto !important;
+            }
+
+            .result-table {
+                width: 100% !important;
+                table-layout: fixed;
+                border-collapse: collapse;
+            }
+
+            .result-table tr {
+                page-break-inside: avoid;
+                page-break-after: auto;
+            }
+
+            .result-table td {
+                text-align: center;
+                vertical-align: bottom;
+                padding: 0;
+                border: none;
+                width: auto;
+                height: 1.8em;
+                line-height: 1.8em;
+                font-family: 'Arial', sans-serif;
+                box-sizing: border-box;
+            }
+
+            .pinyin-cell {
+                font-size: 0.9em !important; /* 使用 !important 确保打印时字体不变 */
+                line-height: 1.2em !important;
+            }
+
+            .chinese-cell {
+                font-size: 1.2em !important;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>汉字转拼音工具</h1>
+        <div class="controls">
+            <div class="control-group">
+                <label for="chineseText">输入汉字：</label>
+                <textarea id="chineseText" placeholder="请输入汉字..."></textarea>
+            </div>
+            <div class="control-group">
+                <div class="button-group">
+                    <button id="convertBtn">转换为拼音</button>
+                    <button id="printBtn">打印/导出PDF</button>
+                </div>
+            </div>
+            <div class="control-group">
+                <div class="slider-controls">
+                    <div class="font-size-control">
+                        <label for="fontSize">字体大小：</label>
+                        <input type="range" id="fontSize" min="12" max="24" value="16">
+                        <span id="fontSizeDisplay" class="font-size-display">16px</span>
+                    </div>
+                    <div class="spacing-control">
+                        <label for="spacing">行间距：</label>
+                        <input type="range" id="spacing" min="1" max="3" step="0.1" value="1.5">
+                        <span id="spacingDisplay" class="spacing-display">1.5</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="preview-section">
+            <div class="preview-controls">
+                <h2>预览</h2>
+            </div>
+            <div class="a4-container">
+                <div class="result-container">
+                    <table id="resultTable" class="result-table"></table>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>

@@ -1,5 +1,5 @@
 <script setup>
-import { defineProps, defineEmits, onMounted, ref, onUnmounted, nextTick } from 'vue';
+import { defineProps, defineEmits, onMounted, ref, onUnmounted, nextTick, watch } from 'vue';
 
 const props = defineProps({
   pages: {
@@ -78,36 +78,48 @@ const closeModal = () => {
 
 // 自动缩放逻辑：让A4纸在屏幕上完整显示
 const autoScale = () => {
+  // 如果没有预览区域引用，直接返回
   if (!previewSectionRef.value) return;
-  // 如果是数组 refs (v-for)，previewSectionRef.value 可能是数组
-  const sections = Array.isArray(previewSectionRef.value) ? previewSectionRef.value : [previewSectionRef.value];
   
+  // 处理 v-for 产生的数组 refs
+  const sections = Array.isArray(previewSectionRef.value) ? previewSectionRef.value : [previewSectionRef.value];
   if (sections.length === 0) return;
   
-  const container = sections[0].parentElement;
-  if (!container) return;
+  // 获取父容器（preview-wrapper）
+  const wrapper = document.querySelector('.preview-wrapper');
+  if (!wrapper) return;
   
-  const containerWidth = container.clientWidth;
+  const containerWidth = wrapper.clientWidth;
+  
+  // 如果容器宽度为0（可能被隐藏或未渲染），不执行
+  if (containerWidth === 0) return;
+
   // A4 宽度 210mm ≈ 794px (96dpi)
-  // 这里我们留一点边距
+  // 加上两边 padding 20px (gap 40px 的一半或者自定义边距)
+  // 移动端通常 padding 较小，这里我们假设安全宽度需要减去一些边距
   const a4WidthPx = 800; 
-  const scale = Math.min(1, (containerWidth - 40) / a4WidthPx); // 减去padding
+  
+  // 计算比例：(容器宽度 - 安全边距) / A4像素宽度
+  // 移动端安全边距设为 20px (左右各10px)
+  const scale = Math.min(1, (containerWidth - 20) / a4WidthPx); 
   
   sections.forEach(section => {
       section.style.transform = `scale(${scale})`;
       
       // 修复移动端缩放后的大片空白问题
       if (scale < 1) {
-          // 获取元素实际高度
+          // 获取元素实际高度 (offsetHeight 是未缩放的原始高度)
           const height = section.offsetHeight;
-          // 计算缩放后节省的空间
-          const spaceSaved = height * (1 - scale);
-          // 使用负边距向上拉
-          section.style.marginBottom = `-${spaceSaved}px`;
           
-          // 同时可能需要调整 x 轴的占位，防止左右撑开滚动条
-          // 但由于 transform-origin 是 center，且父容器 align-items: center
-          // 视觉上是居中的。如果父容器 overflow-x: hidden 就可以解决
+          // 计算缩放后实际上看起来的高度
+          // const visualHeight = height * scale;
+          
+          // 计算需要减少的空间 = 原始高度 - 视觉高度
+          // 因为 transform: scale 默认占位还是原始高度
+          const spaceSaved = height * (1 - scale);
+          
+          // 使用负边距把下方的元素拉上来
+          section.style.marginBottom = `-${spaceSaved}px`;
       } else {
           section.style.marginBottom = '0';
       }
@@ -116,9 +128,27 @@ const autoScale = () => {
 
 onMounted(() => {
   window.addEventListener('resize', autoScale);
+  
+  // 使用 ResizeObserver 监听容器宽度变化，更精准
+  const wrapper = document.querySelector('.preview-wrapper');
+  if (wrapper) {
+      const resizeObserver = new ResizeObserver(() => {
+          autoScale();
+      });
+      resizeObserver.observe(wrapper);
+  }
+
   // 延迟一下确保DOM渲染
   setTimeout(autoScale, 100);
+  setTimeout(autoScale, 500); // 双重保险，防止字体加载等导致的布局变化
 });
+
+// 监听数据变化，重新计算缩放
+watch(() => props.pages, () => {
+  nextTick(() => {
+    setTimeout(autoScale, 50);
+  });
+}, { deep: true });
 
 onUnmounted(() => {
   window.removeEventListener('resize', autoScale);

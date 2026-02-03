@@ -368,6 +368,11 @@ input[type="range"]::-webkit-slider-thumb:hover {
     min-height: 120px;
   }
   
+  /* 手机端隐藏打印按钮，因为手机浏览器通常不支持很好的打印预览 */
+  #printBtn {
+    display: none;
+  }
+  
   .config-section {
     padding: 15px;
   }

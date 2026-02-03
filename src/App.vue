@@ -230,7 +230,7 @@ const handlePrint = () => {
   <div class="app-container">
     <!-- 左侧侧边栏：控制面板 -->
     <div class="sidebar no-print">
-      <h1>拼音教学工具</h1>
+      <h1>康娃的娃的古诗拼音生成</h1>
       <ControlPanel 
       :text="chineseText"
       :config="config"

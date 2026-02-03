@@ -1,0 +1,75 @@
+:root {
+  --primary-color: #4a90e2;
+  --primary-dark: #357abd;
+  --success-color: #2ecc71;
+  --warning-color: #f39c12;
+  --danger-color: #e74c3c;
+  --text-color: #2c3e50;
+  --bg-color: #f0f4f8;
+  --card-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+  --border-radius: 12px;
+}
+
+body {
+  font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
+  margin: 0;
+  padding: 0;
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  line-height: 1.6;
+  height: 100vh;
+  overflow: hidden; /* 防止整个页面滚动，让内部区域滚动 */
+}
+
+#app {
+  height: 100%;
+}
+
+/* 打印样式 */
+@media print {
+  body {
+    background-color: white !important;
+    color: #000 !important;
+    padding: 0 !important;
+    height: auto !important; /* 打印时必须解除高度限制 */
+    overflow: visible !important; /* 打印时必须解除滚动限制 */
+  }
+
+  /* 隐藏所有不需要打印的元素 */
+  .no-print {
+    display: none !important;
+  }
+}
+
+/* 移动端适配：解除全局滚动锁定 */
+@media (max-width: 768px) {
+  body {
+    height: auto;
+    overflow-y: auto;
+    overflow-x: hidden;
+  }
+
+  #app {
+    height: auto;
+    overflow: visible;
+  }
+}
+
+/* 优化滚动条样式 */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: rgba(0, 0, 0, 0.2);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(0, 0, 0, 0.3);
+}

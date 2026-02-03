@@ -12,7 +12,7 @@ const props = defineProps({
   },
   showPagination: {
     type: Boolean,
-    default: true
+    default: false
   },
   textAlign: {
     type: String,
@@ -20,15 +20,15 @@ const props = defineProps({
   },
   fontSize: {
     type: Number,
-    default: 16
+    default: 12
   },
   lineHeight: {
     type: Number,
-    default: 1.5
+    default: 1
   },
   gridSize: {
     type: Number,
-    default: 12
+    default: 16
   }
 });
 

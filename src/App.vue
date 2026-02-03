@@ -7,12 +7,12 @@ import WorksheetPreview from './components/WorksheetPreview.vue';
 // State
 const chineseText = ref('');
 const config = reactive({
-  fontSize: 16,
-  lineHeight: 1.5,
+  fontSize: 12,
+  lineHeight: 1,
   showBorder: true,
-  showPagination: true, // 新增：分页预览开关
+  showPagination: false,
   textAlign: 'center',
-  gridSize: 12 
+  gridSize: 16
 });
 
 // Grid Generation Logic
